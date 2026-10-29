@@ -39,7 +39,7 @@ func (a *Config) Middleware(c fiber.Ctx) error {
 	token, err := jwt.ParseWithClaims(parts[1], claims, func(token *jwt.Token) (any, error) {
 		return a.clientSecret, nil
 	}, jwt.WithValidMethods([]string{"HS256"}), jwt.WithExpirationRequired(),
-		jwt.WithIssuer(ClientIssuer), jwt.WithAudience(GoAudience), jwt.WithIssuedAt())
+		jwt.WithIssuer(ClientIssuer), jwt.WithAudience(GoAudience), jwt.WithIssuedAt(), jwt.WithLeeway(5*time.Second))
 	if err != nil || !token.Valid || claims.Subject == "" {
 		return unauthorized(c)
 	}

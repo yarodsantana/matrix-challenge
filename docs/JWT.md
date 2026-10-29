@@ -1,97 +1,61 @@
-# JWT: Fase 3, bloque final
+# Autenticación JWT
 
-## Carpetas modificadas
+Se protegen POST /qr y POST /rotate en Go, y POST /statistics y POST /statistics/qr en Node. GET /health y los assets del frontend son publicos.
 
-- api-go/internal/auth/: configuracion, middleware y emision de tokens de servicio; pruebas.
-- api-go/internal/statistics/: agrega Authorization al POST que Go envia a Express.
-- api-go/cmd/api/: protege /rotate y adapta pruebas e integracion.
-- api-node/src/auth.js: verifica los tokens de servicio antes de leer la matriz.
-- api-node/src/app.js y api-node/test/: integra y prueba la autenticacion.
-- scripts/: create-token.mjs, init-env.ps1 y smoke-test.ps1.
-- raiz: compose.yaml, .gitignore, .env.example, README.md y PROMPTS.md.
-- manifiestos y locks de Go y Node: dependencias JWT.
-
-## Flujo de confianza
-
-Cliente --JWT cliente--> Go --JWT servicio--> Node.
-
-No se reenvia el JWT del cliente a Node. Go valida primero su firma y claims. Si la entrada es valida, rota la matriz y emite un token de servicio de dos minutos para Node. Node verifica el token antes de procesar el JSON.
+## Relaciones de confianza
 
 | Campo | Cliente a Go | Go a Node |
 | --- | --- | --- |
-| algoritmo | HS256 | HS256 |
-| clave | JWT_SECRET | SERVICE_JWT_SECRET |
-| iss (emisor) | matrix-challenge | matrix-api-go |
-| aud (destinatario) | matrix-api-go | matrix-api-node |
-| sub (sujeto) | technical-test-user en la herramienta local | matrix-api-go |
-| exp (vencimiento) | 15 minutos en la herramienta local | 2 minutos |
+| Algoritmo permitido | HS256 | HS256 |
+| Clave de firma | JWT_SECRET | SERVICE_JWT_SECRET |
+| Emisor (iss) | matrix-challenge | matrix-api-go |
+| Destinatario (aud) | matrix-api-go | matrix-api-node |
+| Sujeto (sub) | No vacío; technical-test-user en la herramienta local | matrix-api-go |
+| Duración emitida | 15 minutos | 2 minutos |
+| Vencimiento (exp) | Obligatorio | Obligatorio |
 
-Go exige un sujeto no vacio; Node exige matrix-api-go. Ambas APIs exigen exp y validan su vencimiento, audiencia, emisor y algoritmo. Tambien rechazan nbf futuro e iat futuro cuando esos campos estan presentes. Sin token o con token invalido, devuelven 401 JSON y WWW-Authenticate: Bearer. Los mensajes no revelan detalles de la verificacion.
+La firma autentica los claims; no cifra su contenido. Se verifican firma, algoritmo, emisor, audiencia y vencimiento antes de procesar la matriz. nbf e iat se validan cuando existen. Se permite una tolerancia de reloj explicita de 5 segundos para exp/nbf/iat, debido al pequeño desfase observado entre Windows y Render. Fechas fuera de ese margen se rechazan.
 
-JWT firma los claims; no los cifra. El cuerpo de la matriz sigue viajando como JSON normal. Los poseedores de cada clave HMAC pueden firmar tokens para esa relacion de confianza. Las dos claves distintas evitan que la clave compartida con Node sea tambien la del acceso de clientes a Go.
+Un token ausente o inválido devuelve HTTP 401:
 
-GET /health queda sin autenticacion para los healthchecks. La ruta /rotate requiere JWT incluso cuando el JSON enviado es incorrecto: primero se autentica y despues se valida la entrada.
+    {"error":"token ausente o invalido"}
 
-## Configuracion
+La respuesta incluye WWW-Authenticate: Bearer. No se revelan al cliente detalles internos de la verificacion.
 
-Las claves deben tener al menos 32 bytes y ser distintas. No hay claves por defecto. Go se niega a iniciar con claves ausentes, cortas o iguales; Node rechaza una clave de servicio ausente o corta.
+## Claves y configuración
 
-El .env local fue generado con dos claves aleatorias de 32 bytes representadas como 64 caracteres hexadecimales. No se muestran en las respuestas ni se incluyen en Git o en el contexto Docker. No copiar las claves publicas de las pruebas a .env.
+- Claves distintas de al menos 32 bytes cada una.
+- Sin valores secretos por defecto: el servicio no inicia con configuración inválida.
+- Go recibe ambas claves; Node recibe solo SERVICE_JWT_SECRET.
+- Las claves se inyectan por entorno al ejecutar los contenedores, sin incluirlas en las imagenes.
+- .env esta excluido de Git y Docker. .env.example contiene valores vacios, no credenciales utilizables.
+- Los tests usan claves publicas identificadas como test-only, independientes del .env real.
 
-Para una copia nueva del proyecto, desde la raiz:
+Desde la raíz, crear .env una sola vez:
 
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\init-env.ps1
 
-El script no reemplaza un .env existente. .env.example documenta las variables; no contiene claves utilizables.
+El script conserva un .env existente. En Render se copian las mismas claves desde el archivo local a las variables de los servicios, sin pegarlas en logs o chats.
 
-Compose lee .env y pasa JWT_SECRET y SERVICE_JWT_SECRET a Go. Node recibe solamente SERVICE_JWT_SECRET. Las claves se inyectan al ejecutar los contenedores; no se incrustan en las imagenes.
+## Obtener un token para probar
 
-## Ejecutar con Docker
-
-Desde la raiz del proyecto:
-
-    docker compose up --build --wait --wait-timeout 120
-    docker compose ps
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1
-
-Es necesario reconstruir y recrear los contenedores anteriores: sus imagenes aun no incluyen JWT. El script ahora exige un 401 sin token y despues prueba los calculos con token. Necesita Node y las dependencias locales de api-node para generar el token; si faltan, ejecutar npm.cmd --prefix api-node ci.
-
-## Token local y solicitud manual
-
-Desde la raiz, con Node instalado y dependencias de api-node disponibles:
+Con Node y las dependencias locales de api-node instaladas:
 
     $token = node --env-file=.env .\scripts\create-token.mjs
-    Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/rotate' -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json' -Body '[[1,2,3],[4,5,6]]' | ConvertTo-Json -Depth 10
+    $token | Set-Clipboard
 
-Para pasar un token ya emitido al smoke test:
+Pegar el token en el frontend. La aplicación lo mantiene solo en memoria; no lo guarda en localStorage ni lo devuelve dentro del JSON de resultados.
 
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1 -Token $token
+La herramienta de emisión es local y requiere la clave del desarrollador. No hay un endpoint publico que emita tokens sin verificar identidad; tampoco se implementa una base de usuarios o un login fuera del alcance solicitado.
 
-create-token.mjs es una herramienta local del desarrollador con acceso a JWT_SECRET. No existe un endpoint publico que entregue tokens sin verificar identidad. No se ha agregado una base de usuarios, login o proveedor externo: el requisito implementado es la autenticacion JWT de las dos APIs.
+## Flujo entre servicios
 
-## Sintaxis, paso a paso
+Go valida el token del cliente, procesa la matriz y firma un token NUEVO destinado a Node. No reenvia la credencial del cliente. Cada llamada interna obtiene un token de servicio con dos minutos de duración, suficiente para el timeout de 90 segundos usado durante el arranque en frio de Render Free.
 
-Go:
-1. auth.New lee la configuracion validada una vez al crear la aplicacion.
-2. security.Middleware es una funcion que Fiber ejecuta antes de rotateHandler.
-3. jwt.ParseWithClaims verifica firma y claims con opciones explicitas; no basta con decodificar un token.
-4. c.Next() permite continuar solo despues de autenticar.
-5. client.Token es una funcion almacenada en una estructura; el cliente HTTP la invoca para obtener un token nuevo.
-6. jwt.NewWithClaims(...).SignedString(...) firma el token que Node comprobara.
+Una respuesta 401 de Node se trata como fallo del servicio remoto y Go devuelve 502 al cliente; no confunde ese fallo con el JWT del usuario. Un timeout devuelve 504.
 
-Node:
-1. requireServiceToken(secret) devuelve una funcion middleware que recuerda la clave mediante un cierre (closure).
-2. jwt.verify valida el token con algorithms, issuer, audience y subject explicitos.
-3. exp se exige de forma adicional: la biblioteca verifica su valor cuando existe, pero nuestro contrato prohibe omitirlo.
-4. next() continua al parser JSON y despues al calculo. Si falla la autenticacion, se responde 401 y se termina la solicitud.
+## Validación
 
-## Pruebas
+Las pruebas comprueban tokens válidos, ausentes, mal formados, firma incorrecta, algoritmo no permitido, falta de exp, emisor/audiencia/sujeto incorrectos y fechas fuera del margen. Un adelanto de 3 segundos se admite; adelantos y vencimientos de 60 segundos se rechazan.
 
-Node: npm.cmd --prefix api-node test.
-Go, desde api-go: go test -tags integration ./... -count=1 y go vet ./....
-
-Las pruebas usan claves publicas de prueba, independientes de .env. Se comprueban firma incorrecta, algoritmo distinto, expiracion, falta de exp, emisor/audiencia incorrectos, sujeto y fechas futuras. Las pruebas de calculo y errores de HTTP conservan su contrato usando tokens validos.
-
-La integracion emite un token desde la herramienta Node, lo valida en Go y comprueba que Express acepta el token de servicio firmado por Go. En Windows, tambien ejecuta smoke-test.ps1 contra ambos servidores locales por HTTP real en puertos temporales.
-
-Las imagenes Docker con JWT requieren validacion tras la reconstruccion desde una terminal con acceso al motor; la validacion local y la de configuracion se registran en PROMPTS.md.
+La integración verifica token emitido desde Node -> validación en Go -> token de servicio firmado por Go -> validación en Express. La evidencia publica de ejecución esta en VALIDATION.md.

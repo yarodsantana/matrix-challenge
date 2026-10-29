@@ -1,17 +1,17 @@
 # Matrix Challenge — Go + Fiber / Node.js + Express
 
-Dos APIs REST, comunicacion HTTP, factorizacion QR, rotacion, estadisticas, frontend interactivo, JWT y Docker. Codigo y pruebas preparados para Render Free.
+Dos APIs REST, comunicación HTTP, factorización QR, rotación, estadísticas, frontend interactivo, JWT y Docker. Código y pruebas preparados para Render Free.
 
 ## Inicio rapido con Docker
 
-Desde la raiz del repositorio:
+Desde la raíz del repositorio:
 
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\init-env.ps1
     docker compose up --build --wait --wait-timeout 120
     docker compose ps
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1
 
-Abrir http://localhost:8080. El frontend necesita un JWT de cliente; generarlo y copiarlo desde la raiz:
+Abrir http://localhost:8080. El frontend necesita un JWT de cliente; generarlo y copiarlo desde la raíz:
 
     $token = node --env-file=.env .\scripts\create-token.mjs
     $token | Set-Clipboard
@@ -46,34 +46,34 @@ En Docker, Node solo es accesible en la red Compose. En Render Free, ambos son W
 
 ## Interpretacion del enunciado
 
-El documento mezcla rotacion y factorizacion QR. Son operaciones distintas. Se implementan ambas y se explicita su relacion:
+El documento mezcla rotación y factorización QR. Son operaciones distintas. Se implementan ambas y se explicita su relacion:
 
-- POST /qr: calcula QR de la matriz ORIGINAL A, devuelve tambien la rotacion de A y envia Q/R a Node para estadisticas agregadas.
-- POST /rotate: conserva el contrato inicial de rotacion y estadisticas sobre la matriz rotada. No se elimina ni se cambia su respuesta.
+- POST /qr: calcula QR de la matriz ORIGINAL A, devuelve también la rotación de A y envia Q/R a Node para estadísticas agregadas.
+- POST /rotate: conserva el contrato inicial de rotación y estadísticas sobre la matriz rotada. No se elimina ni se cambia su respuesta.
 - QR completa: para entrada m x n, Q es m x m y R es m x n.
-- La rotacion independiente es de 90 grados en sentido horario.
-- Las estadisticas principales de /qr incluyen TODOS los elementos de Q y R, incluidos ceros.
-- isDiagonal en /qr significa que AL MENOS UNA de Q o R es diagonal. Se informa cuales y se devuelven tambien estadisticas por matriz.
+- La rotación independiente es de 90 grados en sentido horario.
+- Las estadísticas principales de /qr incluyen TODOS los elementos de Q y R, incluidos ceros.
+- isDiagonal en /qr significa que AL MENOS UNA de Q o R es diagonal. Se informa cuales y se devuelven también estadísticas por matriz.
 
-No hay ambiguedad oculta ni se considera una rotacion como sustituto de QR. La eleccion de nombres es coherente (camelCase en metadatos JSON, q/r por convencion matematica) y esta documentada.
+No hay ambiguedad oculta ni se considera una rotación como sustituto de QR. La eleccion de nombres es coherente (camelCase en metadatos JSON, q/r por convencion matematica) y esta documentada.
 
 ## Contratos REST
 
-| Servicio | Metodo / ruta | Entrada | Autenticacion |
+| Servicio | Método / ruta | Entrada | Autenticación |
 | --- | --- | --- | --- |
 | Go | GET / | Frontend | Publica |
 | Go / Node | GET /health | Ninguna | Publica |
-| Go | POST /qr | Array de arrays numericos | JWT cliente |
-| Go | POST /rotate | Array de arrays numericos | JWT cliente |
+| Go | POST /qr | Array de arrays numéricos | JWT cliente |
+| Go | POST /rotate | Array de arrays numéricos | JWT cliente |
 | Node | POST /statistics/qr | Objeto {q, r} | JWT servicio |
-| Node | POST /statistics | Array de arrays numericos | JWT servicio |
+| Node | POST /statistics | Array de arrays numéricos | JWT servicio |
 
-Ejemplo principal (desde la raiz):
+Ejemplo principal (desde la raíz):
 
     $token = node --env-file=.env .\scripts\create-token.mjs
     Invoke-RestMethod -Method Post -Uri http://localhost:8080/qr -Headers @{Authorization="Bearer $token"} -ContentType application/json -Body '[[1,2,3],[4,5,6]]' | ConvertTo-Json -Depth 12
 
-Ejemplo numerico completo para entrada [[2]]:
+Ejemplo numérico completo para entrada [[2]]:
 
     {
       "original": [[2]],
@@ -93,17 +93,17 @@ Ejemplo numerico completo para entrada [[2]]:
     }
 
 Q y R pueden contener signos negativos aunque A sea positiva; (-1)*(-2)=2. El algoritmo y la convencion estan documentados.
-Errores JSON con propiedad error: 400 entrada invalida; 401 JWT ausente/invalido; 413 cuerpo excesivo; 415 Content-Type no admitido; 422 desbordamiento numerico; 502 respuesta invalida o fallo de Node; 504 timeout de Node.
+Errores JSON con propiedad error: 400 entrada inválida; 401 JWT ausente/inválido; 413 cuerpo excesivo; 415 Content-Type no admitido; 422 desbordamiento numérico; 502 respuesta inválida o fallo de Node; 504 timeout de Node.
 
-## Matematicas y limites
+## Matemáticas y límites
 
 Householder calcula A=QR sin exigir rango completo. Se admiten matrices altas, anchas, cuadradas, nulas, columnas dependientes y negativas/decimales. Q/R no son unicas: se usa la convencion de signos producida por las reflexiones, sin forzar diagonal positiva en R.
 
-QR permite hasta 100 filas y 100 columnas para limitar CPU, memoria y tamano de respuesta. El cuerpo HTTP se limita a 1 MiB. Se rechazan matrices vacias, irregulares, null, texto y numeros no finitos. Se escala A para calcular normas y se rechaza un resultado que exceda float64.
+QR permite hasta 100 filas y 100 columnas para limitar CPU, memoria y tamaño de respuesta. El cuerpo HTTP se limita a 1 MiB. Se rechazan matrices vacias, irregulares, null, texto y numeros no finitos. Se escala A para calcular normas y se rechaza un resultado que exceda float64.
 
 Node usa Number, Go float64: no se promete aritmetica decimal exacta. En QR, una matriz cuadrada se considera diagonal cuando cada elemento fuera de la diagonal cumple abs(valor) <= 1e-10 * max(1, maxAbsDeLaMatriz). El endpoint legacy conserva comparacion exacta con cero.
 
-Promedio agregado = (suma(Q) + suma(R)) / (cantidad(Q) + cantidad(R)). No es el promedio simple de los promedios cuando las matrices tienen distinto tamano.
+Promedio agregado = (suma(Q) + suma(R)) / (cantidad(Q) + cantidad(R)). No es el promedio simple de los promedios cuando las matrices tienen distinto tamaño.
 
 ## Carpetas
 
@@ -122,9 +122,9 @@ Promedio agregado = (suma(Q) + suma(R)) / (cantidad(Q) + cantidad(R)). No es el 
 
 | Variable | Servicio | Uso |
 | --- | --- | --- |
-| JWT_SECRET | Go / herramienta local | Clave de cliente, minimo 32 bytes |
-| SERVICE_JWT_SECRET | Go y Node | Otra clave distinta, minimo 32 bytes |
-| STATISTICS_URL | Go | URL de Node terminada en /statistics; /qr se deriva para estadisticas QR |
+| JWT_SECRET | Go / herramienta local | Clave de cliente, mínimo 32 bytes |
+| SERVICE_JWT_SECRET | Go y Node | Otra clave distinta, mínimo 32 bytes |
+| STATISTICS_URL | Go | URL de Node terminada en /statistics; /qr se deriva para estadísticas QR |
 | STATISTICS_TIMEOUT_SECONDS | Go | 3 por defecto; 90 en Render Free; rango 1..120 |
 | PORT | Ambos | 8080 en Go y 3000 en Node por defecto |
 | FRONTEND_DIR | Go | ../frontend local; /app/frontend en Docker |
@@ -145,12 +145,32 @@ Desde api-go:
     go test -tags integration ./... -count=1
     go vet ./...
 
-Integracion requiere Node y dependencias instaladas. Si node no esta en PATH, configurar NODE_BINARY. En Windows tambien se ejecuta el smoke test contra ambos servicios reales en puertos temporales. Los Dockerfiles ejecutan pruebas antes de producir las imagenes finales.
+Integración requiere Node y dependencias instaladas. Si node no esta en PATH, configurar NODE_BINARY. En Windows también se ejecuta el smoke test contra ambos servicios reales en puertos temporales. Los Dockerfiles ejecutan pruebas antes de producir las imagenes finales.
 
-Cobertura de comportamiento: A aproximadamente igual a QR, Q^T Q aproximadamente identidad, R triangular superior, 64 matrices aleatorias deterministas, matrices altas/anchas/deficientes, validaciones, estadisticas de Q+R, JWT, errores HTTP, timeout y preservacion de /rotate. El frontend se verifica como assets servidos y por sintaxis; no se afirma una prueba visual automatizada de navegador.
+Cobertura de comportamiento: A aproximadamente igual a QR, Q^T Q aproximadamente identidad, R triangular superior, 64 matrices aleatorias deterministas, matrices altas/anchas/deficientes, validaciones, estadísticas de Q+R, JWT, errores HTTP, timeout y preservacion de /rotate. El frontend se verifica como assets servidos y por sintaxis; no se afirma una prueba visual automatizada de navegador.
 
 ## Nube y evidencia
 
 Guia paso a paso: docs/DEPLOY_RENDER.md. Blueprint opcional: render.yaml. Ambos servicios se configuran como Free, sin bases de datos ni discos.
 
-El despliegue se considera completado SOLO cuando existen dos URLs reales y el smoke test remoto pasa. Los Dockerfiles/configuracion listos no equivalen a un despliegue realizado. La evidencia actual y las decisiones de IA se registran en PROMPTS.md.
+Ambos servicios estan Live y el smoke test remoto del recorrido completo paso el 29 de octubre de 2026. La ultima revision de tolerancia de reloj debe desplegarse con el envio final del código. La evidencia publica esta en docs/VALIDATION.md; las decisiones tecnicas se sustentan en docs/ARCHITECTURE.md. El registro personal de prompts se conserva fuera del repositorio y de Docker.
+
+Tolerancia de reloj JWT: 5 segundos para exp, nbf e iat. Se observo un pequeño desfase real entre Windows y Render; esta ventana evita rechazar tokens recien emitidos y sigue rechazando fechas fuera de ese margen. Los tests vencidos usan 60 segundos de antiguedad y los futuros inválidos 60 segundos de adelanto.
+
+## Demo desplegada y documentación
+
+- Frontend y API Go: https://api-go-matrix-challenge.onrender.com
+- API Node: https://matrix-challenge-node.onrender.com
+- Contratos HTTP: docs/API.md.
+- Arquitectura y decisiones: docs/ARCHITECTURE.md.
+- Seguridad y tokens: docs/JWT.md.
+- Evidencia de pruebas: docs/VALIDATION.md.
+- Despliegue y reproducción: docs/DEPLOY_RENDER.md.
+- Explicación paso a paso: docs/WALKTHROUGH.md.
+
+Para probar la nube:
+
+    $token = node --env-file=.env .\scripts\create-token.mjs
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1 -BaseUrl https://api-go-matrix-challenge.onrender.com -Token $token
+
+Nota matemática: R es triangular superior cuando es cuadrada; para dimensiones rectangulares se describe como trapezoidal superior, con ceros en posiciones i>j.

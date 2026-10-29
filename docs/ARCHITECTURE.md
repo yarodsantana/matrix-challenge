@@ -2,29 +2,29 @@
 
 ## 1. Responsabilidades exigidas
 
-Se mantienen dos APIs RESTful independientes, una en Go/Fiber y otra en Node/Express. Go recibe la matriz original, realiza las transformaciones y envia resultados a Node por HTTP. Node realiza el calculo adicional y devuelve estadisticas. No se trasladan las estadisticas principales al frontend ni se replica su calculo productivo en Go.
+Se mantienen dos APIs RESTful independientes, una en Go/Fiber y otra en Node/Express. Go recibe la matriz original, realiza las transformaciones y envia resultados a Node por HTTP. Node realiza el cálculo adicional y devuelve estadísticas. No se trasladan las estadísticas principales al frontend ni se replica su cálculo productivo en Go.
 
-El navegador utiliza Go como punto de entrada. Consumir Node directamente permitiria saltarse la transformacion y obligaria a entregar una credencial de servicio al navegador. Por eso el frontend interactua con ambos servicios mediante la orquestacion requerida, conservando la direccion de comunicacion del documento.
+El navegador utiliza Go como punto de entrada. Consumir Node directamente permitiria saltarse la transformacion y obligaria a entregar una credencial de servicio al navegador. Por eso el frontend interactua con ambos servicios mediante la orquestacion requerida, conservando la direccion de comunicación del documento.
 
-## 2. Ambiguedad rotacion / QR
+## 2. Ambiguedad rotación / QR
 
-El requerimiento funcional explicito pide QR de la matriz recibida, mientras que la descripcion de arquitectura habla de rotarla. Decision informada: /qr factoriza la original A, devuelve su rotacion por separado y envia exclusivamente Q y R a Node. La rotacion no reemplaza QR ni se factoriza silenciosamente la matriz rotada.
+El requerimiento funcional explicito pide QR de la matriz recibida, mientras que la descripcion de arquitectura habla de rotarla. Decisión informada: /qr factoriza la original A, devuelve su rotación por separado y envia exclusivamente Q y R a Node. La rotación no reemplaza QR ni se factoriza silenciosamente la matriz rotada.
 
-/rotate se conserva para evitar romper el contrato inicial; el frontend distingue ambos modos. Esta decision cubre las dos operaciones y permite explicar su diferencia durante la entrevista.
+/rotate se conserva para evitar romper el contrato inicial; el frontend distingue ambos modos. Esta decisión cubre las dos operaciones y permite explicar su diferencia durante la entrevista.
 
 ## 3. QR completa y estabilidad
 
-Se usa QR completa: Q de m x m, R de m x n. Esto funciona para cualquier matriz rectangular, incluso ancha o de rango deficiente, sin restricciones ocultas m>=n. Las reflexiones de Householder son preferibles a Gram-Schmidt clasico por su estabilidad. Se implementa el algoritmo en un paquete matematico aislado, con comentarios sobre signo, escalado y acumulacion.
+Se usa QR completa: Q de m x m, R de m x n. Esto funciona para cualquier matriz rectangular, incluso ancha o de rango deficiente, sin restricciones ocultas m>=n. Las reflexiones de Householder son preferibles a Gram-Schmidt clasico por su estabilidad. Se implementa el algoritmo en un paquete matemático aislado, con comentarios sobre signo, escalado y acumulacion.
 
-No se impone que la diagonal de R sea positiva. QR admite distintas convenciones de signo; las estadisticas dependen de esa convencion, que queda declarada. El criterio matematico de aceptacion es A aproximadamente QR y Q^T Q aproximadamente I, no comparar una representacion de Q/R unica.
+No se impone que la diagonal de R sea positiva. QR admite distintas convenciones de signo; las estadísticas dependen de esa convencion, que queda declarada. El criterio matemático de aceptacion es A aproximadamente QR y Q^T Q aproximadamente I, no comparar una representacion de Q/R unica.
 
-Se limita QR a 100x100: Q completa ocupa O(m^2), R ocupa O(mn) y acumular Q tiene coste proporcional a m^2 min(m,n). Ese limite permite una demostracion interactiva controlada sin introducir colas o infraestructura adicional.
+Se limita QR a 100x100: Q completa ocupa O(m^2), R ocupa O(mn) y acumular Q tiene coste proporcional a m^2 min(m,n). Ese límite permite una demostracion interactiva controlada sin introducir colas o infraestructura adicional.
 
 Referencias del algoritmo y convencion completa:
 - https://netlib.org/lapack/explore-html/d0/da1/group__geqrf_gade26961283814bb4e62183d9133d8bf5.html
 - https://www.netlib.org/lapack/lawnspdf/lawn178.pdf
 
-## 4. Estadisticas y diagonal
+## 4. Estadísticas y diagonal
 
 Node agrega todos los valores de Q y R. Incluye los ceros, incluidos los de relleno de R completa. Informa max, min, sum, average y si alguna matriz es diagonal. Ademas expone perMatrix y diagonalMatrices para que el resultado pueda auditarse.
 
@@ -32,13 +32,13 @@ Una diagonal es cuadrada y tiene ceros fuera de la diagonal principal. No debe c
 
 ## 5. Nombres coherentes
 
-El enunciado no impone nombres pero si coherencia. Se usan rutas por operacion (/qr, /rotate), q/r para las matrices matematicas, original/rotated para distinguir entrada y rotacion, statistics para el analisis, y camelCase en propiedades compuestas (isDiagonal, valueCount, diagonalMatrices, perMatrix). No se mezclan distintos nombres para el mismo campo.
+El enunciado no impone nombres pero si coherencia. Se usan rutas por operación (/qr, /rotate), q/r para las matrices matemáticas, original/rotated para distinguir entrada y rotación, statistics para el análisis, y camelCase en propiedades compuestas (isDiagonal, valueCount, diagonalMatrices, perMatrix). No se mezclan distintos nombres para el mismo campo.
 
-Los paquetes Go tienen nombres cortos por responsabilidad. Las funciones publicas tienen comentarios de contrato y las decisiones no obvias tienen explicacion; se evitan comentarios que repitan cada instruccion. Los errores HTTP se manejan de forma compartida, sin duplicar el calculo.
+Los paquetes Go tienen nombres cortos por responsabilidad. Las funciones publicas tienen comentarios de contrato y las decisiones no obvias tienen explicación; se evitan comentarios que repitan cada instruccion. Los errores HTTP se manejan de forma compartida, sin duplicar el cálculo.
 
 ## 6. Seguridad y frontend
 
-JWT HS256 con algoritmo, emisor, audiencia y vencimiento exigidos. Claves distintas para cliente-Go y Go-Node. Configuracion por entorno, sin defaults secretos. /health y assets son publicos; /qr y /rotate requieren JWT.
+JWT HS256 con algoritmo, emisor, audiencia y vencimiento exigidos. Claves distintas para cliente-Go y Go-Node. Configuración por entorno, sin defaults secretos. /health y assets son publicos; /qr y /rotate requieren JWT.
 
 El frontend mantiene el token solo en memoria, renderiza valores con textContent, no evalua HTML del usuario y no incluye dependencias de CDN. CSP limita scripts y conexiones al mismo origen. Se puede copiar/descargar el JSON de resultados; los tokens no forman parte de ese JSON.
 
@@ -59,14 +59,18 @@ No se crean recursos de pago ni se configuran pings para evitar la suspension de
 | Go + Fiber | api-go/cmd/api |
 | Node + Express | api-node/src/app.js |
 | Matriz rectangular | Validate y readMatrix |
-| Factorizacion QR | matrix.FactorQR, propiedades algebraicas y pruebas aleatorias |
-| Rotacion | RotateClockwise, expuesta tambien en /qr |
-| HTTP entre APIs | statistics.Client + integracion con Express real |
-| Estadisticas sobre matrices | calculateQRStatistics |
+| Factorización QR | matrix.FactorQR, propiedades algebraicas y pruebas aleatorias |
+| Rotación | RotateClockwise, expuesta también en /qr |
+| HTTP entre APIs | statistics.Client + integración con Express real |
+| Estadísticas sobre matrices | calculateQRStatistics |
 | Alguna diagonal | isDiagonal agregado + diagonalMatrices |
 | Docker | dos Dockerfiles + compose.yaml |
-| Nube | render.yaml y guia; evidencia de URLs pendiente hasta desplegar |
+| Nube | Dos servicios Render Live; recorrido remoto verificado en VALIDATION.md |
 | Frontend opcional | frontend/, servido por Go |
 | JWT opcional | auth en ambas APIs y pruebas de rechazo |
-| Pruebas opcionales | unitarias, HTTP, algebraicas e integracion |
-| Documentacion / IA | READMEs, docs y PROMPTS.md |
+| Pruebas opcionales | unitarias, HTTP, algebraicas e integración |
+| Documentación | README, contratos, decisiones y evidencias publicas en docs/ |
+
+Tolerancia de reloj JWT: 5 segundos para exp, nbf e iat. Se observo un pequeño desfase real entre Windows y Render; esta ventana evita rechazar tokens recien emitidos y sigue rechazando fechas fuera de ese margen. Los tests vencidos usan 60 segundos de antiguedad y los futuros inválidos 60 segundos de adelanto.
+
+Nota matemática: R es triangular superior cuando es cuadrada; para dimensiones rectangulares se describe como trapezoidal superior, con ceros en posiciones i>j.

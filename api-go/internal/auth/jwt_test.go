@@ -32,6 +32,7 @@ func TestMiddleware(t *testing.T) {
 		want   int
 	}{
 		{"valido", nil, jwt.SigningMethodHS256, clientKey, 200},
+		{"desfase pequeno", func(c jwt.MapClaims) { c["iat"] = now.Add(3 * time.Second).Unix() }, jwt.SigningMethodHS256, clientKey, 200},
 		{"firma incorrecta", nil, jwt.SigningMethodHS256, serviceKey, 401},
 		{"vencido", func(c jwt.MapClaims) { c["exp"] = now.Add(-time.Minute).Unix() }, jwt.SigningMethodHS256, clientKey, 401},
 		{"sin expiracion", func(c jwt.MapClaims) { delete(c, "exp") }, jwt.SigningMethodHS256, clientKey, 401},

@@ -18,11 +18,12 @@ test('JWT protege las estadisticas antes de leer la matriz', async (t) => {
   const url = `http://127.0.0.1:${server.address().port}/statistics`;
   const cases = [
     ['valido', 'Bearer ' + sign(), 200],
+    ['desfase de reloj pequeno', 'Bearer ' + sign({ iat: Math.floor(Date.now() / 1000) + 3 }), 200],
     ['ausente', null, 401],
     ['mal formado', 'Bearer nope', 401],
     ['otro esquema', 'Basic abc', 401],
     ['firma incorrecta', 'Bearer ' + sign({}, {}, wrongSecret), 401],
-    ['vencido', 'Bearer ' + sign({}, { expiresIn: -1 }), 401],
+    ['vencido', 'Bearer ' + sign({}, { expiresIn: -60 }), 401],
     ['audiencia incorrecta', 'Bearer ' + sign({}, { audience: 'matrix-api-go' }), 401],
     ['emisor incorrecto', 'Bearer ' + sign({}, { issuer: 'otro' }), 401],
     ['sujeto incorrecto', 'Bearer ' + sign({}, { subject: 'otro' }), 401],

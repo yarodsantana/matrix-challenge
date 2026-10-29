@@ -16,5 +16,5 @@ Se requiere SERVICE_JWT_SECRET. PORT es 3000 por defecto. No se necesitan JWT_SE
 
 El promedio de Q/R se calcula con la cantidad TOTAL de elementos, sin promediar los promedios. isDiagonal agregado indica si alguna es diagonal; diagonalMatrices enumera q/r y perMatrix permite inspeccionar cada resultado. QR usa tolerancia por matriz 1e-10*max(1,maxAbs); legacy mantiene cero exacto.
 
-La suite actual reporta 67 pruebas aprobadas: calculos, validaciones, JWT, HTTP y agregacion QR. El Dockerfile ejecuta las pruebas al construir. Todos los ejemplos y despliegue: ../README.md y ../docs/DEPLOY_RENDER.md.
-El Dockerfile usa contexto RAIZ del repositorio. Construccion manual: docker build -f api-node/Dockerfile . desde la raiz. En Render, dejar Root Directory vacio.
+La suite actual reporta 68 pruebas aprobadas: calculos, validaciones, JWT, HTTP y agregacion QR. El Dockerfile ejecuta las pruebas al construir. Todos los ejemplos y despliegue: ../README.md y ../docs/DEPLOY_RENDER.md.
+El Dockerfile usa contexto Raíz del repositorio. Construcción manual: docker build -f api-node/Dockerfile . desde la raíz. En Render, dejar Root Directory vacío.
