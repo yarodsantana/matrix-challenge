@@ -19,8 +19,10 @@ Las pruebas de integración necesitan Node y npm ci en ../api-node. Si Node no e
 
 Para ejecutar localmente, cargar las claves sin imprimirlas desde la raíz:
 
-    Get-Content .env | ForEach-Object { if ($_ -match '^(JWT_SECRET|SERVICE_JWT_SECRET)=(.+)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
+    Get-Content .env | ForEach-Object { if ($_ -match '^(JWT_SECRET|SERVICE_JWT_SECRET|DEMO_PASSWORD)=(.+)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') } }
     cd api-go
     go run ./cmd/api
 
 Node debe estar ejecutandose en el puerto 3000, o configurar STATISTICS_URL. Go usa PORT=8080 por defecto, STATISTICS_TIMEOUT_SECONDS=3 y FRONTEND_DIR=../frontend. Configuración y ejemplos actuales: ../README.md. Justificacion: ../docs/ARCHITECTURE.md.
+
+Arquitectura por capas y dependencias: ../docs/PROJECT_ARCHITECTURE.md. El frontend permite obtener el token mediante POST /auth/token con DEMO_PASSWORD; la herramienta de consola es opcional.

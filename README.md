@@ -1,5 +1,7 @@
 # Matrix Challenge — Go + Fiber / Node.js + Express
 
+[Arquitectura del proyecto](docs/PROJECT_ARCHITECTURE.md) · [Contratos HTTP](docs/API.md) · [Despliegue](docs/DEPLOY_RENDER.md)
+
 Dos APIs REST, comunicación HTTP, factorización QR, rotación, estadísticas, frontend interactivo, JWT y Docker. Código y pruebas preparados para Render Free.
 
 ## Inicio rapido con Docker
@@ -11,13 +13,11 @@ Desde la raíz del repositorio:
     docker compose ps
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1
 
-Abrir http://localhost:8080. El frontend necesita un JWT de cliente; generarlo y copiarlo desde la raíz:
+Abrir http://localhost:8080. En Generar token, escribir la contraseña compartida con el evaluador. El token se coloca automáticamente en el formulario y dura 15 minutos. Después ingresar la matriz, seleccionar la operación y calcular.
 
-    $token = node --env-file=.env .\scripts\create-token.mjs
-    $token | Set-Clipboard
+El operador debe configurar DEMO_PASSWORD en .env (mínimo 12 caracteres). La contraseña real no se incluye en el repositorio ni en el JavaScript. Sin esta variable, la emisión devuelve 503; los tokens existentes y las APIs conservan su funcionamiento.
 
-Pegar en Token y calcular. La herramienta local requiere Node y las dependencias de api-node (npm.cmd --prefix api-node ci). El frontend no recibe claves de firma ni almacena tokens en localStorage.
-
+La herramienta scripts/create-token.mjs se mantiene como alternativa operativa para pruebas y automatización, sin ser necesaria para el uso normal del frontend.
 Si el puerto 8080 ya esta ocupado:
 
     $env:GO_PORT='8081'
@@ -26,7 +26,7 @@ Si el puerto 8080 ya esta ocupado:
 
 Para detener: docker compose down. Para ver registros: docker compose logs --tail 100.
 
-## Arquitectura
+## Flujo entre componentes
 
     Navegador / cliente
             | HTTP + JWT cliente
@@ -42,7 +42,7 @@ Para detener: docker compose down. Para ver registros: docker compose logs --tai
 
 Se respeta la direccion Go -> Node del desafio. El frontend consume Go y obtiene resultados de ambos servicios a traves de ese flujo. No accede directamente a Node ni necesita un token interno. Compartir origen evita CORS y un tercer servidor.
 
-En Docker, Node solo es accesible en la red Compose. En Render Free, ambos son Web Services con URL publica; Node exige JWT de servicio. Justificacion completa: docs/ARCHITECTURE.md.
+En Docker, Node solo es accesible en la red Compose. En Render Free, ambos son Web Services con URL publica; Node exige JWT de servicio. Arquitectura por capas, módulos y despliegue: docs/PROJECT_ARCHITECTURE.md. Decisiones funcionales y matemáticas: docs/ARCHITECTURE.md.
 
 ## Interpretacion del enunciado
 
@@ -63,6 +63,7 @@ No hay ambiguedad oculta ni se considera una rotación como sustituto de QR. La 
 | --- | --- | --- | --- |
 | Go | GET / | Frontend | Publica |
 | Go / Node | GET /health | Ninguna | Publica |
+| Go | POST /auth/token | Objeto {password} | Contraseña de demostración |
 | Go | POST /qr | Array de arrays numéricos | JWT cliente |
 | Go | POST /rotate | Array de arrays numéricos | JWT cliente |
 | Node | POST /statistics/qr | Objeto {q, r} | JWT servicio |
@@ -122,6 +123,7 @@ Promedio agregado = (suma(Q) + suma(R)) / (cantidad(Q) + cantidad(R)). No es el 
 
 | Variable | Servicio | Uso |
 | --- | --- | --- |
+| DEMO_PASSWORD | Go | Contraseña de acceso de demostración; mínimo 12 caracteres |
 | JWT_SECRET | Go / herramienta local | Clave de cliente, mínimo 32 bytes |
 | SERVICE_JWT_SECRET | Go y Node | Otra clave distinta, mínimo 32 bytes |
 | STATISTICS_URL | Go | URL de Node terminada en /statistics; /qr se deriva para estadísticas QR |
@@ -162,7 +164,8 @@ Tolerancia de reloj JWT: 5 segundos para exp, nbf e iat. Se observo un pequeño 
 - Frontend y API Go: https://api-go-matrix-challenge.onrender.com
 - API Node: https://matrix-challenge-node.onrender.com
 - Contratos HTTP: docs/API.md.
-- Arquitectura y decisiones: docs/ARCHITECTURE.md.
+- Arquitectura del proyecto: docs/PROJECT_ARCHITECTURE.md.
+- Decisiones funcionales y matemáticas: docs/ARCHITECTURE.md.
 - Seguridad y tokens: docs/JWT.md.
 - Evidencia de pruebas: docs/VALIDATION.md.
 - Despliegue y reproducción: docs/DEPLOY_RENDER.md.

@@ -42,7 +42,7 @@ JWT HS256 con algoritmo, emisor, audiencia y vencimiento exigidos. Claves distin
 
 El frontend mantiene el token solo en memoria, renderiza valores con textContent, no evalua HTML del usuario y no incluye dependencias de CDN. CSP limita scripts y conexiones al mismo origen. Se puede copiar/descargar el JSON de resultados; los tokens no forman parte de ese JSON.
 
-El emisor local es una herramienta del desarrollador, no un login abierto. No se ha inventado un sistema de usuarios que el documento no solicita.
+El acceso de demostración se realiza mediante POST /auth/token, protegido por DEMO_PASSWORD, límite de intentos y respuesta no almacenable. La herramienta local permanece para automatización. La estructura por capas y módulos se detalla en PROJECT_ARCHITECTURE.md.
 
 ## 7. Docker y Render Free
 

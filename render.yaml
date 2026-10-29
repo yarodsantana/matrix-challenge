@@ -32,6 +32,8 @@ services:
         value: /app/frontend
       - key: STATISTICS_TIMEOUT_SECONDS
         value: "90"
+      - key: DEMO_PASSWORD
+        sync: false
       - key: JWT_SECRET
         sync: false
       - key: SERVICE_JWT_SECRET

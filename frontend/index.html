@@ -14,6 +14,13 @@
     <h1 class="h3 mb-4">Matrix Challenge</h1>
     <div class="row g-4">
       <section class="col-lg-5" aria-label="Entrada">
+        <form id="token-form" class="border rounded p-3 mb-4">
+          <h2 class="h6">Generar token</h2>
+          <label for="demo-password" class="form-label">Contraseña</label>
+          <input id="demo-password" class="form-control mb-3" type="password" autocomplete="off" required>
+          <button id="generate-token" class="btn btn-outline-primary" type="submit">Generar token</button>
+          <p id="token-message" class="small mt-2 mb-0" role="status" aria-live="polite"></p>
+        </form>
         <form id="matrix-form">
           <div class="mb-3">
             <label for="operation" class="form-label">Operación</label>

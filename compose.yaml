@@ -17,6 +17,7 @@ services:
       context: .
       dockerfile: api-go/Dockerfile
     environment:
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
       SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:?Define SERVICE_JWT_SECRET en .env}
       STATISTICS_URL: http://api-node:3000/statistics

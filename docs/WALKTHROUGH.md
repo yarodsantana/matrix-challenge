@@ -2,7 +2,7 @@
 
 ## Recorrido de una solicitud
 
-1. El frontend convierte el texto JSON en arrays y valida estructura básica para dar feedback inmediato.
+1. El reclutador usa Generar token con la contraseña compartida. Go emite el JWT y el frontend lo conserva en memoria. Después, el frontend convierte el texto JSON en arrays y valida estructura básica para dar feedback inmediato.
 2. Envia POST /qr con Authorization: Bearer. La validación real y la autenticación siguen en el servidor.
 3. Fiber verifica el JWT antes del manejador. readMatrix rechaza null, textos, matrices vacias o irregulares.
 4. FactorQR calcula Q y R de la original. RotateClockwise calcula la rotación por separado.
@@ -71,7 +71,7 @@ La interfaz necesita un formulario, tablas y una llamada HTTP. HTML/CSS/JS reduc
 
 ### Que limita esta implementacion?
 
-QR hasta 100x100, float64/Number con precisión finita, convencion QR completa, arranque en frio de Render Free y herramienta local de emisión de tokens. No es un sistema de identidad con usuarios o renovacion de sesiones.
+QR hasta 100x100, float64/Number con precisión finita, convencion QR completa, arranque en frio de Render Free y acceso de demostración con contraseña compartida. No es un sistema de identidad con usuarios o renovacion de sesiones.
 
 ## Desarrollo asistido por IA
 

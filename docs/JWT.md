@@ -46,7 +46,7 @@ Con Node y las dependencias locales de api-node instaladas:
 
 Pegar el token en el frontend. La aplicación lo mantiene solo en memoria; no lo guarda en localStorage ni lo devuelve dentro del JSON de resultados.
 
-La herramienta de emisión es local y requiere la clave del desarrollador. No hay un endpoint publico que emita tokens sin verificar identidad; tampoco se implementa una base de usuarios o un login fuera del alcance solicitado.
+La herramienta de emisión es local y requiere la clave del desarrollador. El endpoint POST /auth/token comprueba la contraseña compartida de demostración; no se implementa una base de usuarios ni identidad individual. La herramienta local es una alternativa operativa.
 
 ## Flujo entre servicios
 
@@ -59,3 +59,7 @@ Una respuesta 401 de Node se trata como fallo del servicio remoto y Go devuelve 
 Las pruebas comprueban tokens válidos, ausentes, mal formados, firma incorrecta, algoritmo no permitido, falta de exp, emisor/audiencia/sujeto incorrectos y fechas fuera del margen. Un adelanto de 3 segundos se admite; adelantos y vencimientos de 60 segundos se rechazan.
 
 La integración verifica token emitido desde Node -> validación en Go -> token de servicio firmado por Go -> validación en Express. La evidencia publica de ejecución esta en VALIDATION.md.
+
+## Acceso desde el frontend
+
+El reclutador utiliza Generar token con la contraseña compartida. POST /auth/token valida DEMO_PASSWORD (mínimo 12 caracteres), compara hashes en tiempo constante y aplica cinco intentos fallidos por minuto por IP observada. Entrega un JWT de 15 minutos con Cache-Control: no-store. Sin configuración válida devuelve 503. La contraseña y el JWT permanecen fuera del almacenamiento del navegador; el campo contraseña se limpia tras la emisión correcta.

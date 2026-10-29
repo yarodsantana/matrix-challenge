@@ -145,4 +145,33 @@ jQuery(function ($) {
         $button.prop('disabled', false).text('Calcular');
       });
   });
-});
+
+  $('#token-form').on('submit', function (event) {
+    event.preventDefault();
+    const $generate = $('#generate-token');
+    if ($generate.prop('disabled')) return;
+    const password = $('#demo-password').val();
+    if (!password) {
+      $('#token-message').text('Ingresa la contraseña.');
+      return;
+    }
+    $generate.prop('disabled', true);
+    $('#token-message').text('Generando token…');
+    $.ajax({
+      url: '/auth/token', method: 'POST', contentType: 'application/json',
+      dataType: 'json', data: JSON.stringify({ password }), timeout: 120000
+    })
+      .done(function (response) {
+        $('#token').val(response.accessToken);
+        $('#demo-password').val('');
+        $('#token-message').text('Token generado. Ya puedes calcular.');
+      })
+      .fail(function (xhr, status) {
+        const message = status === 'timeout' ? 'La solicitud tardó demasiado.'
+          : xhr.responseJSON?.error || 'No se pudo generar el token.';
+        $('#token-message').text(message);
+      })
+      .always(function () {
+        $generate.prop('disabled', false);
+      });
+  });});

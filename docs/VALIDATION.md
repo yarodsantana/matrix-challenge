@@ -60,3 +60,7 @@ Render Free puede suspender servicios inactivos. Antes de una demostracion convi
 ## Revisión del frontend con Bootstrap y jQuery
 
 Se verificó la nueva interfaz con jQuery 4.0.0 real en un DOM simulado: validación de JSON, envío AJAX a /rotate y /qr, cabecera Bearer, presentación de resultados, recuperación del botón tras HTTP 401 y tratamiento seguro de mensajes como texto. Esta comprobación no equivale a una revisión visual en navegador. Bootstrap 5.3.8 y jQuery se sirven localmente; los assets se incluyen en las pruebas HTTP de Go.
+
+## Emisión de tokens desde el frontend
+
+Se agregaron pruebas para emisión con contraseña correcta, JWT emitido válido durante 15 minutos, autorización posterior de Go, contraseña incorrecta, JSON inválido, tipo de contenido, cuerpo excesivo, configuración ausente y sexto intento fallido limitado con HTTP 429. El DOM simulado verificó el formulario jQuery, la carga automática del token, el borrado del campo contraseña y la ausencia de almacenamiento local. La nueva ruta debe desplegarse y configurarse con DEMO_PASSWORD para validar este flujo en Render.

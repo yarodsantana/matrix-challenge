@@ -62,6 +62,7 @@ func buildApp(client *statistics.Client) (*fiber.App, error) {
 	}
 	client.Token = security.ServiceToken
 	app := fiber.New(fiber.Config{BodyLimit: 1024 * 1024, ErrorHandler: jsonError})
+	auth.RegisterTokenEndpoint(app, security, os.Getenv("DEMO_PASSWORD"))
 	app.Get("/health", func(c fiber.Ctx) error { return c.JSON(fiber.Map{"status": "ok"}) })
 	app.Post("/rotate", security.Middleware, func(c fiber.Ctx) error { return rotateHandler(c, client) })
 	app.Post("/qr", security.Middleware, func(c fiber.Ctx) error { return qrHandler(c, client) })

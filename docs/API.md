@@ -114,3 +114,17 @@ Los proxies de nube pueden generar sus propios errores fuera de la aplicación. 
 Nota matemática: R es triangular superior cuando es cuadrada; para dimensiones rectangulares se describe como trapezoidal superior, con ceros en posiciones i>j.
 
 Recursos locales adicionales del frontend: GET /vendor/bootstrap.min.css y GET /vendor/jquery.min.js. No cambian los contratos de las APIs.
+
+## Go: POST /auth/token
+
+Endpoint de acceso de demostración. No requiere un JWT previo; requiere la contraseña configurada por el operador en DEMO_PASSWORD.
+
+    {"password":"<contraseña compartida con el reclutador>"}
+
+Respuesta HTTP 200:
+
+    {"accessToken":"<JWT>","tokenType":"Bearer","expiresIn":900}
+
+Cache-Control: no-store. Estados: 400 JSON inválido, 401 contraseña incorrecta, 413 cuerpo mayor a 4 KiB, 415 contenido no admitido, 429 exceso de intentos y 503 emisión no configurada. La contraseña configurada debe tener al menos 12 caracteres. El limitador permite cinco intentos fallidos por minuto por IP observada, en memoria de cada proceso.
+
+El frontend coloca accessToken en el campo Token y permite ejecutar /rotate o /qr sin comandos de consola.

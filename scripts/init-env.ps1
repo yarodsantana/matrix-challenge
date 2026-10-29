@@ -8,6 +8,8 @@ try {
  $clientSecret = [BitConverter]::ToString($bytes).Replace('-','').ToLowerInvariant()
  $rng.GetBytes($bytes)
  $serviceSecret = [BitConverter]::ToString($bytes).Replace('-','').ToLowerInvariant()
- [IO.File]::WriteAllText($path, "JWT_SECRET=$clientSecret`nSERVICE_JWT_SECRET=$serviceSecret`nGO_PORT=8080`n")
+ $rng.GetBytes($bytes)
+ $demoSecret = [BitConverter]::ToString($bytes).Replace('-','').ToLowerInvariant()
+ [IO.File]::WriteAllText($path, "JWT_SECRET=$clientSecret`nSERVICE_JWT_SECRET=$serviceSecret`nDEMO_PASSWORD=$demoSecret`nGO_PORT=8080`n")
  Write-Output '.env creado con dos claves aleatorias; no compartir ni subir a Git.'
 } finally { $rng.Dispose() }
