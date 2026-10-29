@@ -1,0 +1,26 @@
+name: matrix-challenge
+
+services:
+  api-node:
+    build:
+      context: ./api-node
+    environment:
+      SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:?Define SERVICE_JWT_SECRET en .env}
+      NODE_ENV: production
+      PORT: "3000"
+    expose:
+      - "3000"
+
+  api-go:
+    build:
+      context: .
+      dockerfile: api-go/Dockerfile
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:?Define SERVICE_JWT_SECRET en .env}
+      STATISTICS_URL: http://api-node:3000/statistics
+    ports:
+      - "127.0.0.1:${GO_PORT:-8080}:8080"
+    depends_on:
+      api-node:
+        condition: service_healthy

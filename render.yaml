@@ -1,0 +1,43 @@
+# Opcional: crear ambos servicios desde Render > New > Blueprint.
+# STATISTICS_URL debe ser la URL publica REAL de Node seguida de /statistics.
+# Si aun no existe, usar https://node-service.invalid/statistics al crear y actualizar
+# esa variable en Go cuando Node este Live. No es necesario volver a construir.
+services:
+  - type: web
+    name: matrix-challenge-node
+    runtime: docker
+    plan: free
+    dockerfilePath: ./api-node/Dockerfile
+    dockerContext: ./api-node
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: SERVICE_JWT_SECRET
+        sync: false
+
+  - type: web
+    name: matrix-challenge-go
+    runtime: docker
+    plan: free
+    dockerfilePath: ./api-go/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: FRONTEND_DIR
+        value: /app/frontend
+      - key: STATISTICS_TIMEOUT_SECONDS
+        value: "90"
+      - key: JWT_SECRET
+        sync: false
+      - key: SERVICE_JWT_SECRET
+        fromService:
+          type: web
+          name: matrix-challenge-node
+          envVarKey: SERVICE_JWT_SECRET
+      - key: STATISTICS_URL
+        sync: false
