@@ -20,7 +20,7 @@ En https://dashboard.render.com selecciona New > Web Service, conecta GitHub y e
 
 | Campo | Valor |
 | --- | --- |
-| Name | matrix-challenge-node (o un nombre disponible) |
+| Name | api-node-matrix-challenge (o un nombre disponible) |
 | Branch | main |
 | Language / Runtime | Docker |
 | Root Directory | dejar vacio |
@@ -42,7 +42,7 @@ Crear un segundo Web Service desde el mismo repositorio y branch.
 
 | Campo | Valor |
 | --- | --- |
-| Name | matrix-challenge-go (o un nombre disponible) |
+| Name | api-go-matrix-challenge (o un nombre disponible) |
 | Runtime | Docker |
 | Root Directory | dejar vacio |
 | Dockerfile Path | api-go/Dockerfile |

@@ -1,4 +1,4 @@
-# Matrix Lab — Go + Fiber / Node.js + Express
+# Matrix Challenge — Go + Fiber / Node.js + Express
 
 Dos APIs REST, comunicacion HTTP, factorizacion QR, rotacion, estadisticas, frontend interactivo, JWT y Docker. Codigo y pruebas preparados para Render Free.
 

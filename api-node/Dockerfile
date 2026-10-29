@@ -9,6 +9,7 @@ COPY api-node/test ./test
 RUN npm test
 
 FROM node:24.22.1-alpine AS runtime
+LABEL org.opencontainers.image.title="api-node matrix challenge"
 ENV NODE_ENV=production
 ENV PORT=3000
 WORKDIR /app

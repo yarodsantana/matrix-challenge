@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Laboratorio de factorizacion QR, rotacion y estadisticas con Go y Node.js.">
-  <title>Matrix Lab · Go × Node</title>
+  <title>Matrix Challenge</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/" aria-label="Matrix Lab, inicio"><span class="brand-icon">[m]</span> Matrix<span>Lab</span></a><div class="stack"><span>GO / FIBER</span><span class="connector">→ HTTP →</span><span>NODE / EXPRESS</span><span id="health" class="health">Verificando API…</span></div></header>
+  <header class="topbar"><a class="brand" href="/" aria-label="Matrix Challenge, inicio"><span class="brand-icon">[m]</span> Matrix<span>Challenge</span></a><div class="stack"><span>GO / FIBER</span><span class="connector">→ HTTP →</span><span>NODE / EXPRESS</span><span id="health" class="health">Verificando API…</span></div></header>
   <main>
     <section class="intro"><p class="eyebrow">DESAFÍO TÉCNICO · ÁLGEBRA LINEAL</p><h1>Una entrada.<br><span>Dos servicios. Todo verificable.</span></h1><p>Explora la factorización QR y la rotación de una matriz. Go transforma; Node calcula las estadísticas. Tú puedes inspeccionar cada resultado.</p></section>
     <div class="workspace">
@@ -46,6 +46,6 @@
     </div>
     <section class="architecture"><div><span class="step">DECISIÓN DE ARQUITECTURA</span><h2>Cada servicio tiene una responsabilidad.</h2></div><p><strong>Go</strong> recibe A, calcula A = QR con Householder y rota A a 90° horario por separado. <strong>Node</strong> analiza Q y R y verifica si alguna es diagonal. Se usa QR completa: Q de m × m y R de m × n. La comparación diagonal de QR usa tolerancia relativa de 10⁻¹⁰.</p></section>
   </main>
-  <footer><span>Matrix Lab · Prueba técnica</span><span>JWT en ambas APIs · Docker · Pruebas unitarias e integración</span></footer>
+  <footer><span>Matrix Challenge · Prueba técnica</span><span>JWT en ambas APIs · Docker · Pruebas unitarias e integración</span></footer>
 </body>
 </html>
