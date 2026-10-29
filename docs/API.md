@@ -112,3 +112,5 @@ Las respuestas de error de las APIs usan {"error":"mensaje"}. Los mensajes puede
 Los proxies de nube pueden generar sus propios errores fuera de la aplicación. Go no devuelve estadísticas inventadas ni exito parcial cuando Node falla. El cliente HTTP no sigue redirecciones ni reintenta automaticamente.
 
 Nota matemática: R es triangular superior cuando es cuadrada; para dimensiones rectangulares se describe como trapezoidal superior, con ceros en posiciones i>j.
+
+Recursos locales adicionales del frontend: GET /vendor/bootstrap.min.css y GET /vendor/jquery.min.js. No cambian los contratos de las APIs.

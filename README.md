@@ -16,7 +16,7 @@ Abrir http://localhost:8080. El frontend necesita un JWT de cliente; generarlo y
     $token = node --env-file=.env .\scripts\create-token.mjs
     $token | Set-Clipboard
 
-Pegar en Token de acceso y calcular. La herramienta local requiere Node y las dependencias de api-node (npm.cmd --prefix api-node ci). El frontend no recibe claves de firma ni almacena tokens en localStorage.
+Pegar en Token y calcular. La herramienta local requiere Node y las dependencias de api-node (npm.cmd --prefix api-node ci). El frontend no recibe claves de firma ni almacena tokens en localStorage.
 
 Si el puerto 8080 ya esta ocupado:
 
@@ -114,7 +114,7 @@ Promedio agregado = (suma(Q) + suma(R)) / (cantidad(Q) + cantidad(R)). No es el 
     api-go/internal/web/         rutas conocidas de assets
     api-node/src/               Express, JWT y calculos estadisticos
     api-node/test/              pruebas matematicas y HTTP
-    frontend/                   HTML, CSS y JavaScript sin dependencias externas
+    frontend/                   HTML, Bootstrap y jQuery incluidos localmente
     scripts/                    configuracion, JWT, smoke test y publicacion Git
     docs/                       arquitectura, JWT y despliegue
 
@@ -174,3 +174,5 @@ Para probar la nube:
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke-test.ps1 -BaseUrl https://api-go-matrix-challenge.onrender.com -Token $token
 
 Nota matemática: R es triangular superior cuando es cuadrada; para dimensiones rectangulares se describe como trapezoidal superior, con ceros en posiciones i>j.
+
+Frontend: formulario simple con Bootstrap 5.3.8 y jQuery 4.0.0. Las opciones son Rotación y Rotación + factorización QR. Los recursos se incluyen en frontend/vendor; no se requiere un build frontend ni se cargan librerías de CDN en tiempo de ejecución.

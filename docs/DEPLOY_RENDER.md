@@ -73,7 +73,7 @@ Para pegar el token en la interfaz sin mostrarlo en la consola:
 
     $token | Set-Clipboard
 
-Abrir la URL de Go, pegar en Token de acceso, elegir un ejemplo y calcular. El token de cliente vence en 15 minutos; generar otro cuando corresponda.
+Abrir la URL de Go, pegar en Token, ingresar la matriz y calcular. El token de cliente vence en 15 minutos; generar otro cuando corresponda.
 
 Antes de la entrevista, visitar /health en Node y en Go para que ambos servicios esten activos. Render Free duerme servicios inactivos y puede tardar aproximadamente un minuto en despertarlos. No se han configurado pings artificiales ni servicios de pago. La primera consulta puede requerir reintento. El cliente Go admite 90 segundos en Render; por defecto local son 3 segundos. El token de servicio dura dos minutos para cubrir ese margen.
 

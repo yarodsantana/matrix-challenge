@@ -3,49 +3,55 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Laboratorio de factorizacion QR, rotacion y estadisticas con Go y Node.js.">
   <title>Matrix Challenge</title>
+  <link rel="stylesheet" href="/vendor/bootstrap.min.css">
   <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/jquery.min.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="/" aria-label="Matrix Challenge, inicio"><span class="brand-icon">[m]</span> Matrix<span>Challenge</span></a><div class="stack"><span>GO / FIBER</span><span class="connector">→ HTTP →</span><span>NODE / EXPRESS</span><span id="health" class="health">Verificando API…</span></div></header>
-  <main>
-    <section class="intro"><p class="eyebrow">DESAFÍO TÉCNICO · ÁLGEBRA LINEAL</p><h1>Una entrada.<br><span>Dos servicios. Todo verificable.</span></h1><p>Explora la factorización QR y la rotación de una matriz. Go transforma; Node calcula las estadísticas. Tú puedes inspeccionar cada resultado.</p></section>
-    <div class="workspace">
-      <section class="panel input-panel" aria-labelledby="input-title">
-        <div class="panel-heading"><div><span class="step">01 / ENTRADA</span><h2 id="input-title">Define tu matriz</h2></div><span class="tag">JSON</span></div>
+  <main class="container py-4">
+    <h1 class="h3 mb-4">Matrix Challenge</h1>
+    <div class="row g-4">
+      <section class="col-lg-5" aria-label="Entrada">
         <form id="matrix-form">
-          <label for="operation">Operación</label><select id="operation"><option value="qr">Factorización QR + rotación</option><option value="rotate">Solo rotación · contrato original</option></select>
-          <label for="matrix-input">Matriz original A <span id="dimensions" class="muted">3 × 3</span></label>
-          <textarea id="matrix-input" rows="8" spellcheck="false" aria-describedby="matrix-help">[
-  [12, -51, 4],
-  [6, 167, -68],
-  [-4, 24, -41]
+          <div class="mb-3">
+            <label for="operation" class="form-label">Operación</label>
+            <select id="operation" class="form-select">
+              <option value="rotate">Rotación</option>
+              <option value="qr">Rotación + factorización QR</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="matrix-input" class="form-label">Matriz</label>
+            <textarea id="matrix-input" class="form-control font-monospace" rows="7" spellcheck="false" required aria-describedby="matrix-help">[
+  [1, 2, 3],
+  [4, 5, 6]
 ]</textarea>
-          <p id="matrix-help" class="helper">Array de arrays de números. QR: hasta 100 × 100; admite matrices altas, anchas y de rango deficiente.</p>
-          <div class="examples" aria-label="Ejemplos de matrices"><span>PROBAR</span><button type="button" data-example="classic">Clásica</button><button type="button" data-example="tall">3 × 2</button><button type="button" data-example="wide">2 × 3</button><button type="button" data-example="diagonal">Diagonal</button><button type="button" data-example="zero">Ceros</button></div>
-          <div class="auth-heading"><label for="token">Token de acceso</label><button id="toggle-token" class="text-button" type="button" aria-pressed="false">Mostrar</button></div>
-          <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Pega tu JWT de cliente para Go" aria-describedby="token-help">
-          <p id="token-help" class="helper">Solo en memoria; no se guarda en el navegador. Genera uno con la herramienta local del proyecto.</p>
-          <button id="submit" class="primary" type="submit">Calcular y analizar <span>↗</span></button>
-          <p class="shortcut">Ctrl / ⌘ + Enter para ejecutar</p>
+            <div id="matrix-help" class="form-text">Ingresa un array de arrays de números.</div>
+          </div>
+          <div class="mb-3">
+            <label for="token" class="form-label">Token</label>
+            <input id="token" class="form-control" type="password" autocomplete="off" spellcheck="false" required>
+          </div>
+          <button id="submit" class="btn btn-primary" type="submit">Calcular</button>
         </form>
-        <div id="status" class="status" role="status" aria-live="polite">Listo para recibir una matriz.</div>
+        <div id="message" class="alert mt-3 d-none" role="status" aria-live="polite"></div>
       </section>
-      <section class="output" aria-labelledby="output-title">
-        <div class="output-heading"><div><span class="step">02 / RESULTADOS</span><h2 id="output-title">La matemática, a la vista.</h2></div><span id="elapsed" class="tag">Sin ejecutar</span></div>
-        <div id="empty-state" class="empty-state"><div class="formula">A <span>=</span> Q <span>×</span> R</div><h3>Tu siguiente resultado empieza a la izquierda.</h3><p>Q será ortogonal. R será triangular superior.<br>Las estadísticas consideran todos los valores de ambas matrices.</p><div class="flow"><span>01 · Entrada</span><b>→</b><span>02 · Go / QR</span><b>→</b><span>03 · Node / análisis</span></div></div>
-        <div id="results" hidden>
-          <div id="stats" class="stats-grid"></div>
-          <div class="result-note"><span id="diagonal-result"></span><span id="verification"></span></div>
-          <div id="matrices" class="matrices-grid"></div>
-          <details class="json-panel"><summary>Inspeccionar respuesta JSON</summary><div class="json-actions"><button id="copy-result" type="button">Copiar JSON</button><button id="download-result" type="button">Descargar</button></div><pre id="raw-result"></pre></details>
+      <section class="col-lg-7" aria-labelledby="result-title">
+        <h2 id="result-title" class="h5">Resultado</h2>
+        <p id="empty-result" class="text-secondary">Completa los campos y presiona Calcular.</p>
+        <div id="result" class="d-none">
+          <div id="statistics" class="table-responsive"></div>
+          <p id="diagonal-result" class="small"></p>
+          <div id="matrices"></div>
+          <details class="mt-3">
+            <summary>Ver JSON</summary>
+            <pre id="raw-result" class="border rounded p-3 mt-2 bg-light"></pre>
+          </details>
         </div>
       </section>
     </div>
-    <section class="architecture"><div><span class="step">DECISIÓN DE ARQUITECTURA</span><h2>Cada servicio tiene una responsabilidad.</h2></div><p><strong>Go</strong> recibe A, calcula A = QR con Householder y rota A a 90° horario por separado. <strong>Node</strong> analiza Q y R y verifica si alguna es diagonal. Se usa QR completa: Q de m × m y R de m × n. La comparación diagonal de QR usa tolerancia relativa de 10⁻¹⁰.</p></section>
   </main>
-  <footer><span>Matrix Challenge · Prueba técnica</span><span>JWT en ambas APIs · Docker · Pruebas unitarias e integración</span></footer>
 </body>
 </html>

@@ -91,7 +91,7 @@ func TestQRRejectsInputBeforeCallingNode(t *testing.T) {
 
 func TestFrontendAssets(t *testing.T) {
 	app := newApp()
-	for _, path := range []string{"/", "/app.js", "/styles.css"} {
+	for _, path := range []string{"/", "/app.js", "/styles.css", "/vendor/bootstrap.min.css", "/vendor/jquery.min.js"} {
 		req := httptest.NewRequest("GET", path, nil)
 		res, err := app.Test(req, fiber.TestConfig{Timeout: 10 * time.Second, FailOnTimeout: true})
 		if err != nil {

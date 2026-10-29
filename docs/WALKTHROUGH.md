@@ -9,7 +9,7 @@
 5. El cliente HTTP Go emite un JWT de servicio y envia {q,r} a Express.
 6. Express autentica, valida Content-Type y decodifica JSON. calculateQRStatistics calcula resultados.
 7. Go comprueba el contrato recibido y devuelve matrices, estadísticas y metadatos.
-8. El frontend muestra resultados y calcula solo un error de reconstrucción independiente para ayudar a verificar A=QR; las estadísticas mostradas vienen de Node.
+8. El frontend muestra las matrices y estadísticas recibidas. jQuery gestiona el formulario y la petición AJAX; Bootstrap aporta los estilos. No se recalculan estadísticas en el navegador.
 
 ## Go que debes poder explicar
 

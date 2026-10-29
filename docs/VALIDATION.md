@@ -56,3 +56,7 @@ El frontend fue servido correctamente por HTTP, sus assets se probaron y su Java
 El entorno del asistente no tiene acceso directo al motor Docker. La ejecución de contenedores locales fue confirmada por el propietario; el despliegue Docker en Render y las pruebas remotas proporcionan evidencia adicional independiente.
 
 Render Free puede suspender servicios inactivos. Antes de una demostracion conviene abrir ambos /health y generar un token nuevo. Las revisiones futuras deben repetir la prueba remota; esta evidencia no garantiza disponibilidad permanente del proveedor.
+
+## Revisión del frontend con Bootstrap y jQuery
+
+Se verificó la nueva interfaz con jQuery 4.0.0 real en un DOM simulado: validación de JSON, envío AJAX a /rotate y /qr, cabecera Bearer, presentación de resultados, recuperación del botón tras HTTP 401 y tratamiento seguro de mensajes como texto. Esta comprobación no equivale a una revisión visual en navegador. Bootstrap 5.3.8 y jQuery se sirven localmente; los assets se incluyen en las pruebas HTTP de Go.

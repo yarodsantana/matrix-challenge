@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// Register publica solo tres archivos conocidos; no acepta rutas del usuario.
+// Register publica archivos conocidos; no acepta rutas del usuario.
 // Compartir origen con la API evita CORS y un proxy adicional en el despliegue.
 func Register(app *fiber.App, directory string) error {
 	if directory == "" {
@@ -18,7 +18,7 @@ func Register(app *fiber.App, directory string) error {
 		return fmt.Errorf("resolver directorio frontend: %w", err)
 	}
 	directory = absolute
-	files := map[string]string{"/": "index.html", "/app.js": "app.js", "/styles.css": "styles.css"}
+	files := map[string]string{"/": "index.html", "/app.js": "app.js", "/styles.css": "styles.css", "/vendor/bootstrap.min.css": "vendor/bootstrap.min.css", "/vendor/jquery.min.js": "vendor/jquery.min.js"}
 	for route, file := range files {
 		path := filepath.Join(directory, file)
 		app.Get(route, func(c fiber.Ctx) error {
