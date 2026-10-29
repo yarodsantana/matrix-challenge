@@ -3,7 +3,8 @@ name: matrix-challenge
 services:
   api-node:
     build:
-      context: ./api-node
+      context: .
+      dockerfile: api-node/Dockerfile
     environment:
       SERVICE_JWT_SECRET: ${SERVICE_JWT_SECRET:?Define SERVICE_JWT_SECRET en .env}
       NODE_ENV: production

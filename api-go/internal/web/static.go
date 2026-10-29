@@ -1,17 +1,23 @@
 package web
 
 import (
-	"github.com/gofiber/fiber/v3"
+	"fmt"
 	"path/filepath"
+
+	"github.com/gofiber/fiber/v3"
 )
 
 // Register publica solo tres archivos conocidos; no acepta rutas del usuario.
 // Compartir origen con la API evita CORS y un proxy adicional en el despliegue.
-func Register(app *fiber.App, directory string) {
+func Register(app *fiber.App, directory string) error {
 	if directory == "" {
 		directory = filepath.Join("..", "frontend")
 	}
-	directory, _ = filepath.Abs(directory)
+	absolute, err := filepath.Abs(directory)
+	if err != nil {
+		return fmt.Errorf("resolver directorio frontend: %w", err)
+	}
+	directory = absolute
 	files := map[string]string{"/": "index.html", "/app.js": "app.js", "/styles.css": "styles.css"}
 	for route, file := range files {
 		path := filepath.Join(directory, file)
@@ -21,4 +27,5 @@ func Register(app *fiber.App, directory string) {
 			return c.SendFile(path)
 		})
 	}
+	return nil
 }

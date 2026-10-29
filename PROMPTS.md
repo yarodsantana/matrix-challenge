@@ -117,3 +117,15 @@ El usuario indico cuenta Render gratuita y creo https://github.com/yarodsantana/
 Preparacion: render.yaml con dos Web Services Free, contexto Docker correcto por servicio y secretos por entorno; docs/DEPLOY_RENDER.md con procedimiento manual Node primero, Go despues y prueba remota. No se inventan URLs publicadas. Se incluye scripts/publish.ps1 para el envio desde la terminal del usuario.
 Cambio justificado: token de servicio ampliado de 1 a 2 minutos para cubrir timeout Render de 90s sin expirar durante el arranque en frio. Timeout local sigue siendo 3s; configurable 1..120s.
 Estado: funcionalidades requeridas y frontend implementados localmente. Publicacion GitHub y despliegue cloud requieren autenticacion del usuario y validacion de URLs reales; no se declaran completados.
+
+P013 — Revision de buenas practicas y cierre de calidad
+Se separo configuracion de arranque y manejadores, eliminando panic del camino productivo. Se validan URL HTTP(S), timeout y claves antes de abrir el puerto. Se uniforman errores Fiber en JSON, se validan errores de resolucion de directorios y se agrupan imports Go. CSS pasa de compacto a formateado para facilitar lectura. La agregacion Node reutiliza un objeto perMatrix con nombres claros.
+Pruebas nuevas: configuracion invalida, errores 404/413 JSON y contrato QR remoto (campos ausentes, conteo, diagonales y tipos). El 413 se prueba por HTTP real porque app.Test devuelve un error de transporte en ese caso. El healthcheck Node ahora respeta PORT.
+Se agrega docs/WALKTHROUGH.md para estudiar sintaxis y defender arquitectura, QR, estadisticas y uso de IA. El usuario confirmo que publico el primer commit 2954b57 mediante autenticacion GitHub desde su propia terminal. El despliegue Render sigue en curso y no se afirma que este terminado.
+
+P014 — Corregir el contexto Docker observado en Render
+Evidencia del usuario: Deploy failed con failed to calculate checksum /test: not found. La causa es un Dockerfile Node que esperaba contexto api-node mientras Render usaba la raiz.
+Correccion: ambos Dockerfiles usan ahora contexto raiz. Node copia api-node/package*.json, api-node/src y api-node/test; Compose y render.yaml se sincronizan. En Render, Root Directory vacio y Dockerfile Path api-node/Dockerfile o api-go/Dockerfile. No se modifican calculos ni JWT.
+Esta correccion elimina la necesidad de configurar un contexto especial por servicio y evita ambiguedad del monorepo. Se espera confirmar un nuevo despliegue real despues de publicar el commit.
+
+Verificacion final P013/P014: suite Go completa con integration aprobada en cmd/api, internal/auth, internal/matrix e internal/statistics. go vet aprobado. Compilacion Linux amd64 con CGO_ENABLED=0 aprobada. 67 pruebas Node aprobadas. Vista previa nativa con .env local paso smoke completo por HTTP, incluido QR y frontend. La prueba de limite HTTP se estabilizo comprobando rechazo de Content-Length excesivo antes del upload; se evito una carrera de cierre TCP de Windows. Compose validado tras unificar contextos. Despliegue Render aun pendiente de confirmar.

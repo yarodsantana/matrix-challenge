@@ -65,7 +65,8 @@ export function calculateQRStatistics(input) {
   const valueCount = rows * rows + input.r.length * input.r[0].length;
   const sum = q.sum + r.sum;
   if (!Number.isFinite(sum)) throw new RangeError('La suma excede el rango numerico admitido');
-  const diagonalMatrices = ['q', 'r'].filter((name) => ({ q, r })[name].isDiagonal);
+  const perMatrix = { q, r };
+  const diagonalMatrices = ['q', 'r'].filter((name) => perMatrix[name].isDiagonal);
   return {
     max: Math.max(q.max, r.max),
     min: Math.min(q.min, r.min),
@@ -76,6 +77,6 @@ export function calculateQRStatistics(input) {
     valueCount,
     diagonalMatrices,
     diagonalTolerance: QR_DIAGONAL_TOLERANCE,
-    perMatrix: { q, r },
+    perMatrix,
   };
 }

@@ -99,3 +99,16 @@ func qrHandler(c fiber.Ctx, client *statistics.Client) error {
 		"metadata": fiber.Map{"factorization": "A = Q R", "qrMode": "full", "rotationDegrees": 90, "rotationDirection": "clockwise"},
 	})
 }
+
+// jsonError mantiene formato uniforme incluso en errores de Fiber (413, 404...).
+func jsonError(c fiber.Ctx, err error) error {
+	code, message := 500, "error interno del servidor"
+	var httpError *fiber.Error
+	if errors.As(err, &httpError) {
+		code, message = httpError.Code, httpError.Message
+	}
+	if code >= 500 {
+		log.Printf("error HTTP: %v", err)
+	}
+	return c.Status(code).JSON(fiber.Map{"error": message})
+}

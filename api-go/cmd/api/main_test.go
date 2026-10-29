@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"example.com/matrix-api/internal/statistics"
-	"github.com/gofiber/fiber/v3"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	"example.com/matrix-api/internal/statistics"
+	"github.com/gofiber/fiber/v3"
 )
 
 func TestRotateHTTPValidMatrix(t *testing.T) {

@@ -1,11 +1,14 @@
 package main
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"example.com/matrix-api/internal/statistics"
+	"github.com/gofiber/fiber/v3"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const testClientSecret = "test-only-client-secret-32-bytes-minimum"
@@ -31,4 +34,21 @@ func testToken(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return token
+}
+
+// Adaptadores de pruebas: el arranque productivo propaga errores de configuracion.
+func newApp() *fiber.App {
+	app, err := configuredApp()
+	if err != nil {
+		panic(err)
+	}
+	return app
+}
+
+func newAppWithClient(client *statistics.Client) *fiber.App {
+	app, err := buildApp(client)
+	if err != nil {
+		panic(err)
+	}
+	return app
 }

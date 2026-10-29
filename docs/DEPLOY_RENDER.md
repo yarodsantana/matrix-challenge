@@ -25,7 +25,7 @@ En https://dashboard.render.com selecciona New > Web Service, conecta GitHub y e
 | Language / Runtime | Docker |
 | Root Directory | dejar vacio |
 | Dockerfile Path | api-node/Dockerfile |
-| Docker Build Context | api-node |
+| Docker Build Context | . (raiz del repositorio) |
 | Instance Type | Free |
 | Health Check Path | /health |
 
@@ -97,3 +97,6 @@ Referencias oficiales:
 - https://render.com/docs/docker
 - https://render.com/docs/blueprint-spec
 - https://render.com/docs/free
+
+### Error /test not found
+Ambos Dockerfiles usan ahora contexto raiz. Root Directory debe quedar vacio; Dockerfile Path es api-node/Dockerfile o api-go/Dockerfile. Node copia api-node/package*.json, api-node/src y api-node/test. Este ajuste resuelve el error de checksum cuando Render usa su contexto raiz predeterminado.
